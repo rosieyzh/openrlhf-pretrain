@@ -1,0 +1,16 @@
+no_greedy: false
+no_multiple: false
+
+sweep:
+  - task: 'gsm8k'
+    input_key: 'question'
+    output_key: 'answer'
+    checkpoint_path: ['<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_4xomi1_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi2_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_omi2_mmqa_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi1_omi2/latest-unsharded-hf']
+  - task: 'aime3'
+    input_key: 'problem'
+    output_key: 'answer'
+    checkpoint_path: ['<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_4xomi1_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi2_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_omi2_mmqa_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi1_omi2/latest-unsharded-hf']
+  - task: 'aime'
+    input_key: 'Question'
+    output_key: 'Answer'
+    checkpoint_path: ['<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_4xomi1_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi2_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_omi2_mmqa_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi1_omi2/latest-unsharded-hf']

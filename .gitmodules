@@ -1,0 +1,3 @@
+[submodule "OLMo"]
+	path = OLMo
+	url = git@github.com:allenai/OLMo.git

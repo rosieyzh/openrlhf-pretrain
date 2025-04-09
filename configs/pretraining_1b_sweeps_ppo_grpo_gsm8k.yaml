@@ -1,0 +1,53 @@
+ref_num_nodes: 1 
+ref_num_gpus_per_node: 1 
+critic_num_nodes: 1 
+critic_num_gpus_per_node: 1 
+actor_num_nodes: 1 
+actor_num_gpus_per_node: 1 
+remote_rm_url: <PATH_TO_DIR>/openrlhf-pretrain/openrlhf/utils/math_verifier.py # REPLACE WITH YOUR ABSOLUTE PATH TO math_verifier.py
+vllm_num_engines: 1 
+vllm_tensor_parallel_size: 1 
+micro_train_batch_size: 8 
+micro_rollout_batch_size: 16 
+max_samples: 5000000 
+max_epochs: 1 
+prompt_max_len: 1024
+generate_max_len: 1024 
+zero_stage: 3 
+actor_learning_rate: 1e-6
+critic_learning_rate: 7e-6
+prompt_data: openai/gsm8k 
+input_key: question 
+label_key: answer 
+use_wandb: <YOUR WANDB KEY HERE> # REPLACE WITH YOUR WANDB KEY
+train_batch_size: 64
+save_steps: -1
+save_log_scale_count: 15
+temperature: 0.7
+num_episodes: 10
+wandb_prefix: 1b_ppo_gsm8k
+no_chat_template: true
+colocate_all_models: false
+disable_ds_ckpt: true
+sweep:
+  - pretrain: ['<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_4xomi1_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi2_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_omi2_mmqa_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi1_omi2/latest-unsharded-hf']
+    init_kl_coef: [0, 1.0e-3, 1.0e-2]
+    rollout_batch_size: [64]
+    n_samples_per_prompt: [8]
+    advantage_estimator: ['gae']
+    use_kl_loss: false
+    kl_estimator: k1
+  - pretrain: ['<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_4xomi1_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi2_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_omi2_mmqa_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi1_omi2/latest-unsharded-hf']
+    init_kl_coef: [0, 1.0e-3, 1.0e-2]
+    rollout_batch_size: [64]
+    n_samples_per_prompt: [8]
+    advantage_estimator: ['reinforce_baseline']
+    use_kl_loss: false
+    kl_estimator: k1
+  - pretrain: ['<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_4xomi1_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi2_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_omi2_mmqa_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi1_omi2/latest-unsharded-hf']
+    init_kl_coef: [0, 1.0e-3, 1.0e-2]
+    rollout_batch_size: [64]
+    n_samples_per_prompt: [8]
+    advantage_estimator: ['group_norm']
+    use_kl_loss: true
+    kl_estimator: k3

@@ -1,0 +1,21 @@
+max_len: 1024
+dataset: openai/gsm8k
+input_key: question
+output_key: answer
+train_batch_size: 256
+micro_train_batch_size: 8
+max_samples: 5000000
+k: 64
+temperature: 1.0
+save_steps: 200
+logging_steps: 1
+eval_steps: 500
+zero_stage: 3
+max_epochs: 2
+use_wandb: <YOUR WANDB KEY HERE> # REPLACE WITH YOUR WANDB KEY
+eval_split: test
+no_chat_template: true
+
+sweep:
+  - pretrain: ['<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_4xomi1_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi2_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_omi2_mmqa_continue/latest-unsharded-hf', '<PATH_TO_CHECKPOINT>/OLMo-1B-as_fm3_tg_omi1_omi2/latest-unsharded-hf'] # for the first iteration of EI, we don't need to specify generator -- will set generator = pretrain
+    learning_rate: [1e-4]
