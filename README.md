@@ -1,6 +1,6 @@
 # Echo Chamber: RL Post-training Amplifies Behaviors Learned in Pretraining
 
-Accompanying code for experiments in "Echo Chamber: RL Post-training Amplifies Behaviors Learned in Pretraining". We are grateful to the contributors of the [OpenRLHF](https://github.com/OpenRLHF/OpenRLHF), [math-verify](git@github.com:huggingface/Math-Verify.git) and [AI2 OLMo](https://github.com/allenai/OLMo) repositories, from which this code is built on top of.
+Accompanying code for experiments in "Echo Chamber: RL Post-training Amplifies Behaviors Learned in Pretraining". We are grateful to the contributors of the [OpenRLHF](https://github.com/OpenRLHF/OpenRLHF), [math-verify](https://github.com/huggingface/Math-Verify) and [AI2 OLMo](https://github.com/allenai/OLMo) repositories, from which this code is built on top of.
 
 ## Setup
 The code is up-to-date with OpenRLHF 0.6.3post1, with `vllm` version set to **0.8.1**.
@@ -23,3 +23,13 @@ We use the distributed PPO implementation from OpenRLHF using Ray. We've also wr
 In `inference` we provide various scripts for evaluating our models, as well as accompanying sweep files to launch SLURM array jobs in a similar manner as fine-tuning. 
 * In `inference/run_inference_all.py`, we provide our script for getting pass@1, pass@k and majority@k results using `math-verify` to parse and verify final answers for correctness. Using the flags `--no_greedy` and `--no_multiple` will turn off getting pass@1 or pass@k/majority@k results respectively.
 * In `inference/query_gpt.py` we provide our script for qualitatively analyzing MATH generations from the base and fine-tuned model; this script assumes one generation per response and will use the json file generated from getting pass@1 results from `inference/run_inference_all.py`. The python script `inference/query_gpt_all.py` is analogous but was used for analyzing AIME generations from the base and fine-tuned model, using the json file generated from getting pass@64 results from `inference/run_inference_all.py`.
+
+## Citation
+```bibtex
+@article{zhao2025echo,
+  title={Echo Chamber: RL Post-training Amplifies Behaviors Learned in Pretraining},
+  author={Zhao, Rosie and Meterez, Alexandru and Kakade, Sham and Pehlevan, Cengiz and Jelassi, Samy and Malach, Eran},
+  journal={arXiv preprint arXiv:2504.07912},
+  year={2025}
+}
+```
