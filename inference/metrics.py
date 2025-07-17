@@ -109,7 +109,7 @@ def compute_greedy_metrics(results, test_data, input_key, output_key):
     Compute metrics for greedy decoding (single generation per prompt).
 
     Args:
-        results: VLLM generation results
+        results: LLM generation results
         test_data: Test dataset
         input_key: Key for input field in dataset
         output_key: Key for output field in dataset
@@ -179,7 +179,7 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
     Compute pass@k and majority@k metrics for multiple generations per prompt.
 
     Args:
-        results: VLLM generation results
+        results: LLM generation results
         test_data: Test dataset
         input_key: Key for input field in dataset
         output_key: Key for output field in dataset
