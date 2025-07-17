@@ -4,6 +4,24 @@ from math_verify import parse, verify
 from openrlhf.utils.math_verifier import verify_llm_answer, get_llm_answer
 
 
+def compute_coverage_metrics(correct_counts):
+    """
+    Compute coverage (L0 norm) metrics from correct answer counts.
+
+    Args:
+        correct_counts: List of counts of correct answers per problem
+
+    Returns:
+        dict: Coverage metrics
+    """
+    coverage = np.mean([1.0 if count > 0 else 0.0 for count in correct_counts])
+    return {
+        "coverage": coverage,
+        "problems_solved": sum(1 for count in correct_counts if count > 0),
+        "total_problems": len(correct_counts),
+    }
+
+
 def compute_greedy_metrics(results, test_data, input_key, output_key):
     """
     Compute metrics for greedy decoding (single generation per prompt).
@@ -19,6 +37,7 @@ def compute_greedy_metrics(results, test_data, input_key, output_key):
     """
     processed_data = []
     acc_res = []
+    correct_counts = []
     response_type_count = defaultdict(int)
     response_type_stats = defaultdict(list)
 
@@ -44,6 +63,7 @@ def compute_greedy_metrics(results, test_data, input_key, output_key):
         doc_copy["acc"] = acc
 
         acc_res.append(acc)
+        correct_counts.append(int(acc))  # 1 if correct, 0 if incorrect
         processed_data.append(doc_copy)
 
     # Compute final metrics
@@ -54,6 +74,10 @@ def compute_greedy_metrics(results, test_data, input_key, output_key):
             metrics[f"{response_type}_acc"] = np.mean(response_type_stats[response_type])
 
     metrics["final_accuracy"] = np.mean(acc_res)
+
+    # Add coverage metrics
+    coverage_metrics = compute_coverage_metrics(correct_counts)
+    metrics.update(coverage_metrics)
 
     return processed_data, metrics
 
@@ -75,6 +99,7 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
     processed_data = []
     pass_acc_res = []
     maj_acc_res = []
+    correct_counts = []  # Number of correct generations per problem
     response_type_count = defaultdict(int)
     response_type_stats = defaultdict(list)
 
@@ -85,6 +110,7 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
 
         # Pass Criterion Evaluation
         one_correct = False
+        correct_count = 0
         # For majority calculation
         parsed_predictions = []
         parsed_predictions_str = []
@@ -98,6 +124,11 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
                 acc = 0.0
                 prediction = None
                 response_type = "text"
+
+            if acc == 1.0:
+                correct_count += 1
+                if not one_correct:
+                    one_correct = True
 
             if prediction is not None:
                 if isinstance(prediction, list):
@@ -114,13 +145,11 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
             response_type_stats[response_type].append(acc)
             doc_copy["completions"].append({"output": generated_text, "acc": acc})
 
-            if acc == 1.0 and not one_correct:
-                one_correct = True
-
         # Set pass@k result
         pass_acc = 1.0 if one_correct else 0.0
         pass_acc_res.append(pass_acc)
         doc_copy["acc"] = pass_acc
+        correct_counts.append(correct_count)
 
         # Compute majority@k
         maj_acc = 0.0
@@ -174,5 +203,9 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
 
     metrics["final_accuracy"] = np.mean(pass_acc_res)
     metrics["final_maj_accuracy"] = np.mean(maj_acc_res)
+
+    # Add coverage metrics
+    coverage_metrics = compute_coverage_metrics(correct_counts)
+    metrics.update(coverage_metrics)
 
     return processed_data, metrics
