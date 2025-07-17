@@ -22,6 +22,31 @@ def compute_coverage_metrics(correct_counts):
     }
 
 
+def compute_pass_count_metrics(correct_counts, k):
+    """
+    Compute pass-count (L1 norm) metrics from correct answer counts.
+
+    Args:
+        correct_counts: List of counts of correct answers per problem
+        k: Number of generations per problem
+
+    Returns:
+        dict: Pass-count metrics
+    """
+    total_correct = sum(correct_counts)
+    total_generations = len(correct_counts) * k
+
+    pass_count = total_correct / total_generations if total_generations > 0 else 0.0
+    avg_correct_per_problem = np.mean(correct_counts)
+
+    return {
+        "pass_count": pass_count,
+        "avg_correct_per_problem": avg_correct_per_problem,
+        "total_correct": total_correct,
+        "total_generations": total_generations,
+    }
+
+
 def compute_greedy_metrics(results, test_data, input_key, output_key):
     """
     Compute metrics for greedy decoding (single generation per prompt).
@@ -78,6 +103,10 @@ def compute_greedy_metrics(results, test_data, input_key, output_key):
     # Add coverage metrics
     coverage_metrics = compute_coverage_metrics(correct_counts)
     metrics.update(coverage_metrics)
+
+    # Add pass-count metrics (for greedy, k=1)
+    pass_count_metrics = compute_pass_count_metrics(correct_counts, k=1)
+    metrics.update(pass_count_metrics)
 
     return processed_data, metrics
 
@@ -207,5 +236,9 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
     # Add coverage metrics
     coverage_metrics = compute_coverage_metrics(correct_counts)
     metrics.update(coverage_metrics)
+
+    # Add pass-count metrics
+    pass_count_metrics = compute_pass_count_metrics(correct_counts, best_of_n)
+    metrics.update(pass_count_metrics)
 
     return processed_data, metrics
