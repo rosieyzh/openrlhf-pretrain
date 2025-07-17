@@ -2,6 +2,7 @@ import numpy as np
 from collections import defaultdict, Counter
 from math_verify import parse, verify
 from openrlhf.utils.math_verifier import verify_llm_answer, get_llm_answer
+import re
 
 
 def compute_coverage_metrics(correct_counts):
@@ -47,6 +48,62 @@ def compute_pass_count_metrics(correct_counts, k):
     }
 
 
+def compute_bigram_diversity(generations_per_problem):
+    """
+    Compute bigram diversity (Distinct-2) metrics from text generations.
+
+    Args:
+        generations_per_problem: List of lists, where each inner list contains
+                               all text generations for a single problem
+
+    Returns:
+        dict: Bigram diversity metrics
+    """
+    diversity_scores = []
+
+    for generations in generations_per_problem:
+        if not generations:
+            continue
+
+        # Combine all generations for this problem
+        combined_text = " ".join(generations)
+
+        # Simple tokenization (split by whitespace and remove punctuation)
+        tokens = re.findall(r"\b\w+\b", combined_text.lower())
+
+        if len(tokens) < 2:
+            # Can't compute bigrams with fewer than 2 tokens
+            diversity_scores.append(0.0)
+            continue
+
+        # Extract bigrams
+        bigrams = [(tokens[i], tokens[i + 1]) for i in range(len(tokens) - 1)]
+
+        if not bigrams:
+            diversity_scores.append(0.0)
+            continue
+
+        # Calculate distinct-2: unique bigrams / total bigrams
+        unique_bigrams = len(set(bigrams))
+        total_bigrams = len(bigrams)
+
+        diversity_score = unique_bigrams / total_bigrams
+        diversity_scores.append(diversity_score)
+
+    if not diversity_scores:
+        mean_diversity = 0.0
+        std_diversity = 0.0
+    else:
+        mean_diversity = np.mean(diversity_scores)
+        std_diversity = np.std(diversity_scores)
+
+    return {
+        "bigram_diversity": mean_diversity,
+        "bigram_diversity_std": std_diversity,
+        "bigram_diversity_scores": diversity_scores,
+    }
+
+
 def compute_greedy_metrics(results, test_data, input_key, output_key):
     """
     Compute metrics for greedy decoding (single generation per prompt).
@@ -63,6 +120,7 @@ def compute_greedy_metrics(results, test_data, input_key, output_key):
     processed_data = []
     acc_res = []
     correct_counts = []
+    generations_per_problem = []
     response_type_count = defaultdict(int)
     response_type_stats = defaultdict(list)
 
@@ -89,6 +147,7 @@ def compute_greedy_metrics(results, test_data, input_key, output_key):
 
         acc_res.append(acc)
         correct_counts.append(int(acc))  # 1 if correct, 0 if incorrect
+        generations_per_problem.append([generated_text])  # Single generation for greedy
         processed_data.append(doc_copy)
 
     # Compute final metrics
@@ -107,6 +166,10 @@ def compute_greedy_metrics(results, test_data, input_key, output_key):
     # Add pass-count metrics (for greedy, k=1)
     pass_count_metrics = compute_pass_count_metrics(correct_counts, k=1)
     metrics.update(pass_count_metrics)
+
+    # Add bigram diversity metrics
+    bigram_diversity_metrics = compute_bigram_diversity(generations_per_problem)
+    metrics.update(bigram_diversity_metrics)
 
     return processed_data, metrics
 
@@ -129,6 +192,7 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
     pass_acc_res = []
     maj_acc_res = []
     correct_counts = []  # Number of correct generations per problem
+    generations_per_problem = []  # All generations per problem for diversity
     response_type_count = defaultdict(int)
     response_type_stats = defaultdict(list)
 
@@ -140,12 +204,15 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
         # Pass Criterion Evaluation
         one_correct = False
         correct_count = 0
+        problem_generations = []
         # For majority calculation
         parsed_predictions = []
         parsed_predictions_str = []
 
         for inc_output in result.outputs:
             generated_text = inc_output.text
+            problem_generations.append(generated_text)  # Store all generations
+
             try:
                 prediction, response_type = get_llm_answer(generated_text)
                 acc = verify(answer, prediction) * 1.0
@@ -179,6 +246,7 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
         pass_acc_res.append(pass_acc)
         doc_copy["acc"] = pass_acc
         correct_counts.append(correct_count)
+        generations_per_problem.append(problem_generations)
 
         # Compute majority@k
         maj_acc = 0.0
@@ -240,5 +308,9 @@ def compute_multiple_metrics(results, test_data, input_key, output_key, best_of_
     # Add pass-count metrics
     pass_count_metrics = compute_pass_count_metrics(correct_counts, best_of_n)
     metrics.update(pass_count_metrics)
+
+    # Add bigram diversity metrics
+    bigram_diversity_metrics = compute_bigram_diversity(generations_per_problem)
+    metrics.update(bigram_diversity_metrics)
 
     return processed_data, metrics
