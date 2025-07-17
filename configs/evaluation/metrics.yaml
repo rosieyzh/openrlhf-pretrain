@@ -1,3 +1,6 @@
+skip_greedy: false
+skip_multiple: false
+
 sweep:
   - task: 'gsm8k'
     input_key: 'question'

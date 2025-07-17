@@ -1,5 +1,5 @@
-no_greedy: false
-no_multiple: false
+skip_greedy: false
+skip_multiple: false
 
 sweep:
   - task: 'gsm8k'
