@@ -24,6 +24,13 @@ In `inference` we provide various scripts for evaluating our models, as well as 
 * In `inference/run_inference_all.py`, we provide our script for getting pass@1, pass@k and majority@k results using `math-verify` to parse and verify final answers for correctness. Using the flags `--no_greedy` and `--no_multiple` will turn off getting pass@1 or pass@k/majority@k results respectively.
 * In `inference/query_gpt.py` we provide our script for qualitatively analyzing MATH generations from the base and fine-tuned model; this script assumes one generation per response and will use the json file generated from getting pass@1 results from `inference/run_inference_all.py`. The python script `inference/query_gpt_all.py` is analogous but was used for analyzing AIME generations from the base and fine-tuned model, using the json file generated from getting pass@64 results from `inference/run_inference_all.py`.
 
+## Checkpoints
+Pretrained model checkpoints as well as checkpoints from RL fine-tuning on GSM8K on two of our pretrained 1B models are available at the following HuggingFace collections:
+
+* [Pretrained models](https://huggingface.co/collections/rosieyzh/olmo-150m-and-olmo-1b-pretrained-models-686c40ebfd921e4d40a16797) (150m and 1b): There are several different dataset mixtures, and on each model card we have included how to read the model name to get the contents of the pretraining dataset.
+
+* Checkpoints from RL fine-tuning on GSM8K starting from 2 different 1B models-- [TinyGSM+OMI2](https://huggingface.co/collections/rosieyzh/olmo-1b-as-fm3-tg-omi2-6853492929d964214b9f713b) and [TinyGSM+OMI1+OMI2](https://huggingface.co/collections/rosieyzh/olmo-1b-as-fm3-tg-omi1-omi2-6853498440b1b1adab24cd39): We've included checkpoints after each epoch (for 10 epochs total) as well as on a log-scale with number of steps.
+
 ## Citation
 ```bibtex
 @article{zhao2025echo,
